@@ -34,9 +34,8 @@ fn main() {
 
     //println!("ls {:?}",String::from_utf8(Command::new("ls").current_dir(&c_src_path).output().unwrap().stdout));
 
-    let files = "cli.o kalloc.o ksw2_gg.o ksw2_gg2.o ksw2_gg2_sse.o ksw2_extz.o ksw2_extz2_sse.o ksw2_extd.o ksw2_extd2_sse.o ksw2_extf2_sse.o ksw2_exts2_sse.o";
-    for file in files.split(" ")
-    {
+    let files = "cli.o kalloc.o ksw2_gg.o ksw2_gg2.o ksw2_gg2_sse.o ksw2_extz.o ksw2_extz2_sse.o ksw2_extd.o ksw2_extd2_sse.o ksw2_extf2_sse.o ksw2_exts2_sse.o ksw2_band_doubling.o";
+    for file in files.split(" ") {
         Command::new("cp")
             .arg(file)
             .arg(&out_dir)
