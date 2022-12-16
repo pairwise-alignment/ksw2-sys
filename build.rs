@@ -1,5 +1,7 @@
+extern crate bindgen;
+
 use std::env;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn main() {
@@ -18,12 +20,12 @@ fn main() {
     Command::new("sed")
         .current_dir(&c_src_path)
         .arg("-i")
-        .arg("s/-g -Wall -Wextra -Wc++-compat -O2/ -g -Wall -Wextra -Wc++-compat -O2 -fPIC/g")
+        .arg("s/-g -Wall -Wextra -Wc++-compat -O2/ -g -Wc++-compat -O2 -fPIC/g")
         .arg("Makefile")
         .output()
         .expect("Failed to modify ksw2 makefile.");
 
-   // build the library
+    // build the library
     Command::new("make")
         .arg(format!("-j{}", num_jobs))
         .current_dir(&c_src_path)
@@ -65,6 +67,28 @@ fn main() {
         .output()
         .expect("Failed to restore ksw2 makefile.");
 
+    // The bindgen::Builder is the main entry point
+    // to bindgen, and lets you build up options for
+    // the resulting bindings.
+    let bindings = bindgen::Builder::default()
+        // The input header we would like to generate
+        // bindings for.
+        .header("ksw2/ksw2.h")
+        //.parse_callbacks(Box::new(ignored_macros))
+        .rustfmt_bindings(true)
+        //.clang_arg("-IW")
+        // Tell cargo to invalidate the built crate whenever any of the
+        // included header files changed.
+        // .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        // Finish the builder and generate the bindings.
+        .generate()
+        // Unwrap the Result and panic on failure.
+        .expect("Unable to generate bindings");
+
+    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
 
     // let cargo know that it can find the file in the out directory
     println!("cargo:rustc-link-search=native={}", out_dir);
